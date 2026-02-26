@@ -1,7 +1,7 @@
 # Flux local dev environment with Docker and Kubernetes KIND
 # Requirements:
 # - Docker
-# - Homebrew
+# - Homebrew (macOS) or Devbox (Linux/other platforms)
 
 .PHONY: up
 up: cluster-up flux-push flux-up ## Create the local cluster and registry, install Flux and the cluster addons
@@ -21,8 +21,15 @@ check: ## Check if the NGINX ingress self-signed TLS works
 	curl --insecure https://podinfo.flux.local
 
 .PHONY: tools
-tools: ## Install Kubernetes kind, kubectl, FLux CLI and other tools with Homebrew
+tools: ## Install Kubernetes kind, kubectl, Flux CLI and other tools (Homebrew on macOS, Devbox on other platforms)
+ifeq ($(shell uname -s),Darwin)
+	@echo "Detected macOS - using Homebrew"
 	brew bundle
+else
+	@echo "Detected $(shell uname -s) - using Devbox"
+	@which devbox > /dev/null 2>&1 || (echo "Error: devbox not found. Install it from https://www.jetify.com/devbox/docs/installing_devbox/" && exit 1)
+	devbox install
+endif
 
 .PHONY: validate
 validate: ## Validate the Kubernetes manifests (including Flux custom resources)
