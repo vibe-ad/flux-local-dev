@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.13.7/.schema/devbox.schema.json",
+  "packages": [
+    "kubectl@latest",
+    "kind@latest",
+    "yq-go@latest",
+    "jq@latest",
+    "cue@latest",
+    "kubernetes-helm@latest",
+    "kustomize@latest",
+    "kubeconform@latest",
+    "oras@latest",
+    "go-containerregistry@latest",
+    "cosign@latest",
+    "fluxcd@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'Devbox environment loaded with Kubernetes and Flux tools'",
+      "echo 'Available tools: kubectl, kind, yq, jq, cue, helm, kustomize, kubeconform, oras, crane, cosign, flux'"
+    ]
+  }
+}
