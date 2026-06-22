@@ -12,10 +12,6 @@ install_cluster() {
 cat <<EOF | kind create cluster --name ${cluster_name} --wait 5m --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-containerdConfigPatches:
-  - |-
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
-      endpoint = ["http://${reg_name}:${reg_internal_port}"]
 nodes:
   - role: control-plane
     kubeadmConfigPatches:
@@ -32,6 +28,20 @@ nodes:
         hostPort: ${cluster_ingress_tls_port}
         protocol: TCP
 EOF
+}
+
+# containerd 2.x (kindest/node v1.35.0) rejects the inline registry.mirrors
+# patch and only accepts the config_path / hosts.toml mirror format. The node
+# image already sets config_path = /etc/containerd/certs.d, so the mirror is
+# configured by dropping a hosts.toml into each node post-create.
+configure_registry_mirror() {
+  local registry_dir="/etc/containerd/certs.d/localhost:${reg_port}"
+  for node in $(kind get nodes --name "${cluster_name}"); do
+    docker exec "${node}" mkdir -p "${registry_dir}"
+    cat <<EOF | docker exec -i "${node}" cp /dev/stdin "${registry_dir}/hosts.toml"
+[host."http://${reg_name}:${reg_internal_port}"]
+EOF
+  done
 }
 
 register_registry() {
@@ -60,6 +70,7 @@ fi
 # Create a cluster with the local registry enabled
 if [ "$(kind get clusters | grep ${cluster_name})" != "${cluster_name}" ]; then
   install_cluster
+  configure_registry_mirror
   register_registry
 fi
 
