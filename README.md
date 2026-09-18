@@ -1,5 +1,7 @@
 # flux-local-dev
 
+> ⓘ This fork is used at Vibe to test flux-promoter on a local environment, see https://github.com/vibe-ad/gitops_sbx for setup instructions.
+
 [![test](https://github.com/stefanprodan/flux-local-dev/workflows/test/badge.svg)](https://github.com/stefanprodan/flux-local-dev/actions)
 [![license](https://img.shields.io/github/license/stefanprodan/flux-local-dev.svg)](https://github.com/stefanprodan/flux-local-dev/blob/main/LICENSE)
 [![release](https://img.shields.io/github/release/stefanprodan/flux-local-dev/all.svg)](https://github.com/stefanprodan/flux-local-dev/releases)
