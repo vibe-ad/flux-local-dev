@@ -1,0 +1,59 @@
+name: stale
+
+# Closes pull requests nobody has touched in two months, after a one-month warning.
+on:
+  schedule:
+    - cron: "30 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  contents: write # delete-branch
+
+concurrency:
+  group: stale
+  cancel-in-progress: false
+
+jobs:
+  stale:
+    name: "Close stale pull requests 🧹"
+    runs-on: ubuntu-latest
+    steps:
+      # actions/stale v11.0.0, pinned to an immutable SHA
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93
+        with:
+          # Issues are out of scope.
+          days-before-issue-stale: -1
+          days-before-issue-close: -1
+
+          days-before-pr-stale: 30
+          days-before-pr-close: 30
+
+          stale-pr-label: stale
+          exempt-pr-labels: keep-open
+          exempt-draft-pr: false
+          remove-pr-stale-when-updated: true
+
+          # The commits survive under refs/pull/<n>/head, and the closed PR offers
+          # "Restore branch", so this costs one click to undo.
+          delete-branch: true
+
+          # Oldest first, so a backlog that exceeds the per-run budget still drains
+          # from the worst end instead of restarting on the same head every day.
+          sort-by: updated
+          ascending: true
+          operations-per-run: 200
+
+          stale-pr-message: |
+            This pull request has had no activity for 30 days, so it is now marked **stale**.
+
+            - Still relevant? Push a commit or comment — the label goes away on its own.
+            - Parked on purpose? Add the `keep-open` label and this workflow will leave it alone for good.
+
+            Otherwise it will be closed automatically in 30 days, and its branch deleted. The commits
+            are kept by GitHub either way: reopening restores the branch.
+          close-pr-message: |
+            Closed automatically after 60 days without activity, and the branch was deleted.
+
+            Nothing is lost — the commits and the diff stay attached to this pull request. Use
+            "Restore branch" here, then reopen, to pick the work back up.
